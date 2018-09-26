@@ -10,7 +10,7 @@ from bio2bel import AbstractManager
 from bio2bel.manager.flask_manager import FlaskMixin
 from .constants import MODULE
 from .models import Base, Chemical, Interaction, Protein
-from .parser import get_df
+from .parser import get_chunks
 
 
 class Manager(AbstractManager, FlaskMixin):
@@ -26,10 +26,11 @@ class Manager(AbstractManager, FlaskMixin):
 
     def populate(self, url: Optional[str] = None) -> None:
         """Populate the database."""
-        df = get_df(url=url)
+        chunks = get_chunks(url=url)
 
-        for row in tqdm(df.iterrows()):
-            pass
+        for chunk in tqdm(chunks):
+            for row in tqdm(chunk.iterrows(), leave=False):
+                pass
 
     def count_chemicals(self) -> int:
         """Count the chemicals in the database."""

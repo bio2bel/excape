@@ -13,7 +13,7 @@ from .constants import PATH, URL
 downloader = make_downloader(URL, PATH)
 
 
-def get_df(url: Optional[str] = None, cache: bool = True, force_download: bool = False, chunksize=100_000):
+def get_chunks(url: Optional[str] = None, cache: bool = True, force_download: bool = False, chunksize=100_000):
     """Get the data from Zenodo as a data frame."""
     if url is None and cache:
         url = downloader(force_download=force_download)
@@ -22,5 +22,5 @@ def get_df(url: Optional[str] = None, cache: bool = True, force_download: bool =
         url or URL,
         sep='\t',
         chunksize=chunksize,
-        compression='gzip',
+        compression='xz',
     )
