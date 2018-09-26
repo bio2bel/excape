@@ -2,4 +2,4 @@
 
 """Bio2BEL ExCAPE-DB."""
 
-from bio2bel_excape.manager import Manager
+from bio2bel_excape.manager import Manager  # noqa: F401
