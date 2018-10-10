@@ -35,7 +35,8 @@ Command Line Utility
 
 Tests
 -----
-Bio2BEL ExCAPE uses `tox` for testing. After cloning the repository, install `tox` with:
+Bio2BEL ExCAPE uses `tox` for testing. After cloning the repository,
+install `tox` with:
 
 .. code-block:: sh
 
