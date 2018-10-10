@@ -30,7 +30,7 @@ class Manager(AbstractManager, FlaskMixin):
 
         for chunk in tqdm(chunks):
             for row in tqdm(chunk.iterrows(), leave=False):
-                pass
+                raise NotImplementedError
 
     def count_chemicals(self) -> int:
         """Count the chemicals in the database."""
@@ -46,3 +46,12 @@ class Manager(AbstractManager, FlaskMixin):
             chemicals=self.count_chemicals(),
             proteins=self.count_proteins(),
         )
+
+    def get_chemical_by_inchi_key(self, inchi_key: str) -> Optional[Chemical]:
+        """Get a chemical by its InChI key, if it exists."""
+        # TODO consider validating against regex ^[A-Z]{14}\-[A-Z]{10}(\-[A-Z])?
+        raise NotImplementedError
+
+    def get_protein_by_entrez_id(self, entrez_id: str) -> Optional[Protein]:
+        """Get a protein by its Entrez identifier, if it exists."""
+        raise NotImplementedError
