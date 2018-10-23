@@ -41,4 +41,14 @@ class TestPopulate(TemporaryCacheClassMixin):
         missing_protein = self.manager.get_protein_by_entrez_id('sakgjladlkjghalk')
         self.assertIsNone(missing_protein)
 
+    def test_get_protein_by_entrez_id(self):
+        """Test getting a protein by Entrez identifier that exists."""
+        protein = self.manager.get_protein_by_entrez_id("19885")
+        self.assertIsNotNone(protein)
+        self.assertEqual("19885", protein.entrez_id)
+        self.assertEqual("10090", protein.tax_id)
+        self.assertEqual("RORC", protein.gene_symbol)
+        self.assertEqual("3770", protein.ortholog_group)
+
+
     # TODO @miguel add a test for getting a protein. Needs to have fields for species, gene symbol, ortholog group, etc
