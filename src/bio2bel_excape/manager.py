@@ -24,9 +24,9 @@ class Manager(AbstractManager, FlaskMixin):
         """Check if the database is populated."""
         return 0 < self.count_chemicals()
 
-    def populate(self, url: Optional[str] = None) -> None:
+    def populate(self, url: Optional[str] = None, compression='xz') -> None:
         """Populate the database."""
-        chunks = get_chunks(url=url)
+        chunks = get_chunks(url=url, compression=compression)
 
         for chunk in tqdm(chunks):
             for row in tqdm(chunk.iterrows(), leave=False):

@@ -15,8 +15,9 @@ class TemporaryCacheClassMixin(AbstractTemporaryCacheClassMixin):
     """A test case that has a populated database."""
 
     Manager = Manager
+    manager: Manager
 
     @classmethod
     def populate(cls):
         """Populate the database with test data."""
-        cls.manager.populate(url=TEST_PATH)
+        cls.manager.populate(url=TEST_PATH, compression=None)
