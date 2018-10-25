@@ -49,6 +49,3 @@ class TestPopulate(TemporaryCacheClassMixin):
         self.assertEqual("10090", protein.tax_id)
         self.assertEqual("RORC", protein.gene_symbol)
         self.assertEqual("3770", protein.ortholog_group)
-
-
-    # TODO @miguel add a test for getting a protein. Needs to have fields for species, gene symbol, ortholog group, etc
