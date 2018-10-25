@@ -36,7 +36,6 @@ class Chemical(Base):
     inchi = Column(String(255), nullable=False, doc="inchi key for the chemical")
     smiles = Column(String(255), nullable=False, doc="canonical smile for the chemical")
 
-
     def as_pybel(self) -> pybel.dsl.Abundance:
         """Serialize as a PyBEL abundance."""
         raise NotImplementedError
@@ -71,7 +70,7 @@ class Interaction(Base):
     protein_id = Column(Integer, ForeignKey(f'{Protein.__tablename__}.id'), nullable=False)
     protein = relationship(Protein)
 
-    activity_flag = Column(String(255), nullable=False, nullable=False)
+    activity_flag = Column(String(255), nullable=False)
     original_assay_id = Column(Integer, nullable=False)
 
     def add_to_bel_graph(self, graph: BELGraph) -> str:
