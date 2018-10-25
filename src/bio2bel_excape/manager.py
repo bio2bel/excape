@@ -28,6 +28,9 @@ class Manager(AbstractManager, FlaskMixin):
         """Populate the database."""
         chunks = get_chunks(url=url, compression=compression)
 
+        chemical_dict: Mapping[str, Chemical] = {}
+        protein_dict: Mapping[str, Protein] = {}
+
         for chunk in tqdm(chunks):
             for row in tqdm(chunk.iterrows(), leave=False):
                 raise NotImplementedError
