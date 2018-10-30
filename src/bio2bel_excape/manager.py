@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from bio2bel import AbstractManager
 from bio2bel.manager.flask_manager import FlaskMixin
-from .constants import MODULE
+from .constants import MODULE, HEADER
 from .models import Base, Chemical, Interaction, Protein
 from .parser import get_chunks
 
@@ -29,11 +29,12 @@ class Manager(AbstractManager, FlaskMixin):
         chunks = get_chunks(url=url, compression=compression)
 
         chemical_dict: Mapping[str, Chemical] = {}
-        protein_dict: Mapping[str, Protein] = {}
+        protein_dict:  Mapping[str, Protein]  = {}
 
         for chunk in tqdm(chunks):
-            for row in tqdm(chunk.iterrows(), leave=False):
-                raise NotImplementedError
+            for i,row in tqdm(chunk.iterrows(), leave=False):
+                    Chemical(row[HEADER[0:6]].values)  # For Chemical
+                    Protein (row[HEADER[6:10]].values) # For Protein
 
     def count_chemicals(self) -> int:
         """Count the chemicals in the database."""
