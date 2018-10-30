@@ -14,14 +14,14 @@ PATH = os.path.join(DATA_DIR, 'pubchem.chembl.dataset4publication_inchi_smiles.t
 HEADER = [
     'Ambit_InchiKey',
     'Original_Entry_ID',
-    'Entrez_ID',
-    'Activity_Flag',
     'pXC50',
     'DB',
-    'Original_Assay_ID',
+    'InChI',
+    'SMILES',
+    'Entrez_ID',
     'Tax_ID',
     'Gene_Symbol',
     'Ortholog_Group',
-    'InChI',
-    'SMILES',
+    'Activity_Flag',
+    'Original_Assay_ID'
 ]
