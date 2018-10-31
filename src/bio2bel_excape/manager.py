@@ -33,8 +33,26 @@ class Manager(AbstractManager, FlaskMixin):
 
         for chunk in tqdm(chunks):
             for i,row in tqdm(chunk.iterrows(), leave=False):
-                    Chemical(row[HEADER[0:6]].values)  # For Chemical
-                    Protein (row[HEADER[6:10]].values) # For Protein
+                    # Chemical
+                    Chemical(
+                    ambit_inchikey = row.Ambit_InchiKey ,
+                    original_entry_id = row.Original_Entry_ID ,
+                    db = row.pXC50 ,
+                    pxc50 = row.DB ,
+                    inchi = row.InChI ,
+                    smiles = row.SMILES )
+
+                    # Protein
+                    Protein (
+                    entrez_id = row.Entrez_ID,
+                    tax_id = row.Tax_ID,
+                    gene_symbol = row.Gene_Symbol,
+                    ortholog_group = row.Ortholog_Group)
+
+                    # Interaction
+                    Interaction (
+                    activity_flag = row.Activity_Flag,
+                    original_assay_id = row.Original_Assay_ID)
 
     def count_chemicals(self) -> int:
         """Count the chemicals in the database."""
