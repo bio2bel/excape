@@ -44,6 +44,9 @@ class Chemical(Base):
         """Serialize as a PyBEL abundance."""
         return pybel.dsl.Abundance(namespace='inchi', identifier=self.inchi)
 
+    def __repr__(self):
+        return self.inchi
+
 
 class Target(Base):
     """Represents a protein."""
@@ -59,6 +62,9 @@ class Target(Base):
     def as_pybel(self) -> pybel.dsl.Protein:
         """Serialize as a PyBEL protein."""
         return pybel.dsl.Protein(namespace='ncbigene', identifier=self.entrez_id, name=self.gene_symbol)
+    
+    def __repr__(self):
+        return self.gene_symbol
 
 
 class Interaction(Base):
