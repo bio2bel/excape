@@ -17,7 +17,7 @@ class TestPopulate(TemporaryCacheClassMixin):
 
     def test_count_proteins(self):
         """Test counting the proteins in the database."""
-        self.assertEqual(9, self.manager.count_proteins())
+        self.assertEqual(9, self.manager.count_targets())
 
     def test_get_missing_chemical_by_inchi_key(self):
         """Test getting a chemical by InChI key that does not exist."""
