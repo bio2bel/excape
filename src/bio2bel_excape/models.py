@@ -6,7 +6,7 @@ import pybel.dsl
 from pybel import BELGraph
 from sqlalchemy import Column, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 
 from .constants import MODULE
 
@@ -68,10 +68,10 @@ class Interaction(Base):
     id = Column(Integer, primary_key=True)
 
     chemical_id = Column(Integer, ForeignKey(f'{Chemical.__tablename__}.id'), nullable=False)
-    chemical = relationship(Chemical)
+    chemical = relationship(Chemical, backref=backref('interactions'))
 
     target_id = Column(Integer, ForeignKey(f'{Target.__tablename__}.id'), nullable=False)
-    target = relationship(Target)
+    target = relationship(Target, backref=backref('interactions'))
 
     db = Column(String(32), nullable=False, doc="Name of the database from which the chemical was obtained")
     assay_id = Column(String(64), nullable=False)
