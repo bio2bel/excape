@@ -56,7 +56,6 @@ class Target(Base):
     gene_symbol = Column(String(16), nullable=False, doc="name of the gene encoding such protein")
     ortholog_group = Column(String(16), nullable=False, doc="orthogonal group of the protein")
 
-
     def as_pybel(self) -> pybel.dsl.Protein:
         """Serialize as a PyBEL protein."""
         raise NotImplementedError
@@ -70,6 +69,7 @@ class Interaction(Base):
 
     chemical_id = Column(Integer, ForeignKey(f'{Chemical.__tablename__}.id'), nullable=False)
     chemical = relationship(Chemical)
+
     target_id = Column(Integer, ForeignKey(f'{Target.__tablename__}.id'), nullable=False)
     target = relationship(Target)
 
