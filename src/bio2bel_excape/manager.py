@@ -32,38 +32,41 @@ class Manager(AbstractManager, FlaskMixin):
         """Populate the database."""
         chunks = get_chunks(url=url, compression=compression)
 
-        chemical_dict: Mapping[str, Chemical] = {}
-        protein_dict: Mapping[str, Target] = {}
+        inchi_key_to_chemical = {}
+        entrez_gene_id_to_target = {}
 
         for df in tqdm(chunks):
             for i, row in tqdm(df.iterrows(), leave=False):
-                # Chemical
-                chemical = Chemical(
-                    ambit_inchikey=row.Ambit_InchiKey,
-                    original_entry_id=row.Original_Entry_ID,
-                    db=row.DB,
-                    inchi=row.InChI,
-                    smiles=row.SMILES,
-                )
+                chemical = inchi_key_to_chemical.get(row.Ambit_InchiKey)
+                if chemical is None:
+                    inchi_key_to_chemical[row.Ambit_InchiKey] = chemical = Chemical(
+                        ambit_inchikey=row.Ambit_InchiKey,
+                        original_entry_id=row.Original_Entry_ID,
+                        db=row.DB,
+                        inchi=row.InChI,
+                        smiles=row.SMILES,
+                    )
+                    self.session.add(chemical)
 
-                # Protein
-                target = Target(
-                    entrez_id=row.Entrez_ID,
-                    tax_id=row.Tax_ID,
-                    gene_symbol=row.Gene_Symbol,
-                    ortholog_group=row.Ortholog_Group,
-                )
+                target = entrez_gene_id_to_target.get(row.Entrez_ID)
+                if target is None:
+                    entrez_gene_id_to_target[row.Entrez_ID] = target = Target(
+                        entrez_id=row.Entrez_ID,
+                        tax_id=row.Tax_ID,
+                        gene_symbol=row.Gene_Symbol,
+                        ortholog_group=row.Ortholog_Group,
+                    )
+                    self.session.add(target)
 
-                # Interaction
                 interaction = Interaction(
                     activity_flag=row.Activity_Flag,
                     assay_id=row.Original_Assay_ID,
                     db=row.DB,
-                    pxc50=row.DB,
+                    pxc50=row.pXC50,
                     chemical=chemical,
                     target=target,
                 )
-                self.session.add_all([chemical, target, interaction])
+                self.session.add(interaction)
             self.session.commit()
 
     def count_targets(self) -> int:
