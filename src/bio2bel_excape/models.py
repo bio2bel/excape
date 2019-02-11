@@ -32,7 +32,7 @@ class Chemical(Base):
 
     ambit_inchikey = Column(String(27), nullable=False, unique=True, doc="Hash of the InChI-String")
     original_entry_id = Column(String(32), nullable=False, doc="Name of the chemical on the original datbase")
-    db = Column(String(16), nullable=False, doc="Name of the database from which the chemical was obtained")
+    db = Column(String(32), nullable=False, doc="Name of the database from which the chemical was obtained")
     inchi = Column(String(4098), nullable=False, unique=True, doc="inchi key for the chemical")
     smiles = Column(String(4098), nullable=False, doc="canonical smile for the chemical")
 
@@ -73,8 +73,8 @@ class Interaction(Base):
     target_id = Column(Integer, ForeignKey(f'{Target.__tablename__}.id'), nullable=False)
     target = relationship(Target)
 
-    db = Column(String(16), nullable=False, doc="Name of the database from which the chemical was obtained")
-    assay_id = Column(Integer, nullable=False)
+    db = Column(String(32), nullable=False, doc="Name of the database from which the chemical was obtained")
+    assay_id = Column(String(64), nullable=False)
     pxc50 = Column(Float, nullable=False, doc="pXC50/potency of the chemical")
     activity_flag = Column(String(255), nullable=False)
 
