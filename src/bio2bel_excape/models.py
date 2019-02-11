@@ -2,12 +2,12 @@
 
 """SQLAlchemy models for Bio2BEL ExCAPE-DB."""
 
-import pybel.dsl
-from pybel import BELGraph
 from sqlalchemy import Column, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
+import pybel.dsl
+from pybel import BELGraph
 from .constants import MODULE
 
 __all__ = [
@@ -42,7 +42,7 @@ class Chemical(Base):
 
     def as_pybel(self) -> pybel.dsl.Abundance:
         """Serialize as a PyBEL abundance."""
-        raise NotImplementedError
+        return pybel.dsl.Abundance(namespace='inchi', identifier=self.inchi)
 
 
 class Target(Base):
@@ -58,7 +58,7 @@ class Target(Base):
 
     def as_pybel(self) -> pybel.dsl.Protein:
         """Serialize as a PyBEL protein."""
-        raise NotImplementedError
+        return pybel.dsl.Protein(namespace='ncbigene', identifier=self.entrez_id, name=self.gene_symbol)
 
 
 class Interaction(Base):
@@ -84,7 +84,16 @@ class Interaction(Base):
 
     def add_to_bel_graph(self, graph: BELGraph) -> str:
         """Add this interaction to a BEL graph."""
-        raise NotImplementedError
+        return graph.add_inhibits(
+            self.chemical.as_pybel(),
+            self.target.as_pybel(),
+            citation='28316655',
+            evidence='from ExCAPE-DB',
+            annotations={
+                'pXC50': self.pxc50,
+                'activity_flag': self.activity_flag,
+            }
+        )
 
     @property
     def assay_url(self):
