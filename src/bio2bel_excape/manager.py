@@ -4,11 +4,11 @@
 
 from typing import Mapping, Optional
 
-from tqdm import tqdm
-
 from bio2bel import AbstractManager
 from bio2bel.manager.flask_manager import FlaskMixin
-from .constants import MODULE, HEADER
+from tqdm import tqdm
+
+from .constants import MODULE
 from .models import Base, Chemical, Interaction, Target
 from .parser import get_chunks
 
@@ -30,18 +30,19 @@ class Manager(AbstractManager, FlaskMixin):
 
     def populate(self, url: Optional[str] = None, compression='xz') -> None:
         """Populate the database."""
-        chunks = get_chunks(url=url, compression=compression)
+        chunksize = 100_000
+        chunks = get_chunks(url=url, compression=compression, chunksize=chunksize)
 
-        inchi_key_to_chemical = {}
+        inchi_to_chemical = {}
         entrez_gene_id_to_target = {}
 
         for df in tqdm(chunks):
-            for i, row in tqdm(df.iterrows(), leave=False):
-                chemical = inchi_key_to_chemical.get(row.Ambit_InchiKey)
+            for i, row in tqdm(df.iterrows(), leave=False, total=chunksize):
+                chemical = inchi_to_chemical.get(row.InChI)
                 if chemical is None:
-                    inchi_key_to_chemical[row.Ambit_InchiKey] = chemical = Chemical(
-                        ambit_inchikey=row.Ambit_InchiKey,
-                        original_entry_id=row.Original_Entry_ID,
+                    inchi_to_chemical[row.InChI] = chemical = Chemical(
+                        inchikey=row.Ambit_InchiKey,
+                        entry_id=row.Original_Entry_ID,
                         db=row.DB,
                         inchi=row.InChI,
                         smiles=row.SMILES,

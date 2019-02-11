@@ -2,13 +2,12 @@
 
 """SQLAlchemy models for Bio2BEL ExCAPE-DB."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Float
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy import UniqueConstraint
-
 import pybel.dsl
 from pybel import BELGraph
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
 from .constants import MODULE
 
 __all__ = [
@@ -24,20 +23,21 @@ INTERACTION_TABLE_NAME = f'{MODULE}_interaction'
 
 Base = declarative_base()
 
+
 class Chemical(Base):
     """Represents a chemical."""
 
     __tablename__ = CHEMICAL_TABLE_NAME
     id = Column(Integer, primary_key=True)
 
-    ambit_inchikey = Column(String(27), nullable=False, unique=True, doc="Hash of the InChI-String")
-    original_entry_id = Column(String(32), nullable=False, doc="Name of the chemical on the original datbase")
+    inchi = Column(String(4098), nullable=False, unique=True, doc="InChI for the chemical")
+    inchikey = Column(String(27), nullable=False, doc="Hash of the InChI for the chemical")
     db = Column(String(32), nullable=False, doc="Name of the database from which the chemical was obtained")
-    inchi = Column(String(4098), nullable=False, unique=True, doc="inchi key for the chemical")
-    smiles = Column(String(4098), nullable=False, doc="canonical smile for the chemical")
+    entry_id = Column(String(32), nullable=False, doc="Identifier of the chemical on the original database")
+    smiles = Column(String(4098), nullable=False, doc="Canonical SMILES for the chemical (no stereochemistry)")
 
     __table_args__ = (
-        UniqueConstraint(db, original_entry_id),
+        UniqueConstraint(db, entry_id),
     )
 
     def as_pybel(self) -> pybel.dsl.Abundance:
@@ -79,7 +79,7 @@ class Interaction(Base):
     activity_flag = Column(String(255), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint(db, assay_id),
+        UniqueConstraint(chemical_id, target_id, db, assay_id),
     )
 
     def add_to_bel_graph(self, graph: BELGraph) -> str:
@@ -92,4 +92,3 @@ class Interaction(Base):
             return f"https://identifiers.org/pubchem.bioassay:{self.assay_id}"
         elif self.db == 'chembl20':
             return f"https://www.ebi.ac.uk/chembl/assay/inspect/CHEMBL{self.assay_id}"
-
