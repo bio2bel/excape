@@ -83,7 +83,7 @@ class Manager(AbstractManager, FlaskMixin):
         # TODO consider validating against regex ^[A-Z]{14}\-[A-Z]{10}(\-[A-Z])?
         raise NotImplementedError
 
-    def get_protein_by_entrez_id(self, entrez_id: str) -> Optional[Protein]:
+    def get_protein_by_entrez_id(self, entrez_id: str) -> Optional[Target]:
         """Get a protein by its Entrez identifier, if it exists."""
         raise NotImplementedError
 
