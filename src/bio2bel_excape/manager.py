@@ -84,12 +84,13 @@ class Manager(AbstractManager, FlaskMixin):
 
     def get_chemical_by_inchi_key(self, inchi_key: str) -> Optional[Chemical]:
         """Get a chemical by its InChI key, if it exists."""
-        # TODO consider validating against regex ^[A-Z]{14}\-[A-Z]{10}(\-[A-Z])?
-        raise NotImplementedError
+        chemical: Chemical = self.session.query(Chemical).filter_by(inchikey=inchi_key).first()
+        return chemical
 
     def get_protein_by_entrez_id(self, entrez_id: str) -> Optional[Target]:
         """Get a protein by its Entrez identifier, if it exists."""
-        raise NotImplementedError
+        target: Target = self.session.query(Target).filter_by(entrez_id=entrez_id).first()
+        return target
 
     def count_interactions(self) -> int:
         """Count the interactions in the database."""

@@ -81,7 +81,7 @@ class Interaction(Base):
 
     db = Column(String(32), nullable=False, doc="Name of the database from which the chemical was obtained")
     assay_id = Column(String(64), nullable=False)
-    pxc50 = Column(Float, nullable=False, doc="pXC50/potency of the chemical")
+    pxc50 = Column(Float, nullable=True, doc="pXC50/potency of the chemical")
     activity_flag = Column(String(255), nullable=False)
 
     __table_args__ = (

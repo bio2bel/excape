@@ -28,7 +28,7 @@ class TestPopulate(TemporaryCacheClassMixin):
         """Test getting a chemical by InChI key."""
         chemical = self.manager.get_chemical_by_inchi_key('AAABHMIRDIOYOK-NPVYFSBINA-N')
         self.assertIsNotNone(chemical)
-        self.assertEqual('AAABHMIRDIOYOK-NPVYFSBINA-N', chemical.inchi_key)
+        self.assertEqual('AAABHMIRDIOYOK-NPVYFSBINA-N', chemical.inchikey)
         self.assertEqual(
             'InChI=1/C18H14N6O3/c1-23-10-15(24(26)27)16(22-23)18(25)19-12-7-8-13-14(9-12)21-17(20-13)11-5-3-2-4-6-11/'
             'h2-10H,1H3,(H,19,25)(H,20,21)/f/h19-20H',
