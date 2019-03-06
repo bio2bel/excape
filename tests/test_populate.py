@@ -3,6 +3,7 @@
 """Tests for population of the database."""
 
 from bio2bel_excape import Manager
+from bio2bel_excape.models import Target
 from tests.cases import TemporaryCacheClassMixin
 
 
@@ -36,16 +37,16 @@ class TestPopulate(TemporaryCacheClassMixin):
         )
         self.assertEqual('O=C(NC=1C=C2N=C(NC2=CC1)C=3C=CC=CC3)C4=NN(C=C4N(=O)=O)C', chemical.smiles)
 
-    def test_get_missing_protein_by_entrez_id(self):
+    def test_get_missing_target_by_entrez_id(self):
         """Test getting a protein by Entrez identifier that does not exist."""
-        missing_protein = self.manager.get_protein_by_entrez_id('sakgjladlkjghalk')
-        self.assertIsNone(missing_protein)
+        missing_target: Target = self.manager.get_target_by_entrez_id('sakgjladlkjghalk')
+        self.assertIsNone(missing_target)
 
-    def test_get_protein_by_entrez_id(self):
+    def test_get_target_by_entrez_id(self):
         """Test getting a protein by Entrez identifier that exists."""
-        protein = self.manager.get_protein_by_entrez_id("19885")
-        self.assertIsNotNone(protein)
-        self.assertEqual("19885", protein.entrez_id)
-        self.assertEqual("10090", protein.tax_id)
-        self.assertEqual("RORC", protein.gene_symbol)
-        self.assertEqual("3770", protein.ortholog_group)
+        target: Target = self.manager.get_target_by_entrez_id("19885")
+        self.assertIsNotNone(target)
+        self.assertEqual("19885", target.entrez_id)
+        self.assertEqual("10090", target.tax_id)
+        self.assertEqual("RORC", target.gene_symbol)
+        self.assertEqual("3770", target.ortholog_group)

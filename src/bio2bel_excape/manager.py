@@ -2,10 +2,12 @@
 
 """Manager for Bio2BEL ExCAPE-DB."""
 
-from typing import Mapping, Optional
+from typing import Mapping, Optional, List
 
 from bio2bel import AbstractManager
 from bio2bel.manager.flask_manager import FlaskMixin
+from pybel import BELGraph
+from pybel.dsl import Abundance, Protein
 from tqdm import tqdm
 
 from .constants import MODULE
@@ -35,6 +37,7 @@ class Manager(AbstractManager, FlaskMixin):
 
         inchi_to_chemical = {}
         entrez_gene_id_to_target = {}
+        seen_assays = {}
 
         for df in tqdm(chunks):
             for i, row in tqdm(df.iterrows(), leave=False, total=chunksize):
@@ -59,15 +62,17 @@ class Manager(AbstractManager, FlaskMixin):
                     )
                     self.session.add(target)
 
-                interaction = Interaction(
-                    activity_flag=row.Activity_Flag,
-                    assay_id=row.Original_Assay_ID,
-                    db=row.DB,
-                    pxc50=row.pXC50,
-                    chemical=chemical,
-                    target=target,
-                )
-                self.session.add(interaction)
+                interaction = seen_assays.get(row.Original_Assay_ID)
+                if interaction is None or interaction.target is not target or interaction.chemical is not chemical:
+                    seen_assays[row.Original_Assay_ID] = interaction = Interaction(
+                        activity_flag=row.Activity_Flag,
+                        assay_id=row.Original_Assay_ID,
+                        db=row.DB,
+                        pxc50=row.pXC50,
+                        chemical=chemical,
+                        target=target,
+                    )
+                    self.session.add(interaction)
             self.session.commit()
 
     def count_targets(self) -> int:
@@ -82,12 +87,13 @@ class Manager(AbstractManager, FlaskMixin):
             proteins=self.count_targets(),
         )
 
-    def get_chemical_by_inchi_key(self, inchi_key: str) -> Optional[Chemical]:
+    def get_chemical_by_inchi_key(self, inchi_key:
+ str) -> Optional[Chemical]:
         """Get a chemical by its InChI key, if it exists."""
         chemical: Chemical = self.session.query(Chemical).filter_by(inchikey=inchi_key).first()
         return chemical
 
-    def get_protein_by_entrez_id(self, entrez_id: str) -> Optional[Target]:
+    def get_target_by_entrez_id(self, entrez_id: str) -> Optional[Target]:
         """Get a protein by its Entrez identifier, if it exists."""
         target: Target = self.session.query(Target).filter_by(entrez_id=entrez_id).first()
         return target
@@ -95,3 +101,31 @@ class Manager(AbstractManager, FlaskMixin):
     def count_interactions(self) -> int:
         """Count the interactions in the database."""
         return self._count_model(Interaction)
+
+    def enrich_chemicals(self, graph: BELGraph):
+        for node in list(graph.nodes()):
+            if type(node).__name__ == 'Abundance':
+                chem: Abundance = node
+                chem_db: Chemical = self.get_chemical_by_inchi_key(chem.name)
+                if chem_db is None:
+                    print(f"Skiping chemical {chem.name}")
+                    continue
+                interactions: List[Interaction] = chem_db.interactions
+                print(f"Working on chemical {node.name} with {len(interactions)} interactions")
+                for inter in interactions:
+                    inter.add_to_bel_graph(graph)
+        return graph
+
+    def enrich_targets(self, graph: BELGraph):
+        for node in list(graph.nodes()):
+            if type(node).__name__ == 'Protein':
+                target: Protein = node
+                target_db: Target = self.get_target_by_entrez_id(target.name)
+                if target_db is None:
+                    print(f"Skiping target {target.name}")
+                    continue
+                interactions: List[Interaction] = target_db.interactions
+                print(f"Working on target {node.name} with {len(interactions)} interactions")
+                for inter in interactions:
+                    inter.add_to_bel_graph(graph)
+        return graph

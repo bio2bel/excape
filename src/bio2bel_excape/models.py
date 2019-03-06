@@ -42,7 +42,7 @@ class Chemical(Base):
 
     def as_pybel(self) -> pybel.dsl.Abundance:
         """Serialize as a PyBEL abundance."""
-        return pybel.dsl.Abundance(namespace='inchi', identifier=self.inchi)
+        return pybel.dsl.Abundance(namespace='inchikey', identifier=self.inchikey)
 
     def __repr__(self):
         return self.inchi
@@ -90,16 +90,26 @@ class Interaction(Base):
 
     def add_to_bel_graph(self, graph: BELGraph) -> str:
         """Add this interaction to a BEL graph."""
-        return graph.add_inhibits(
-            self.chemical.as_pybel(),
-            self.target.as_pybel(),
-            citation='28316655',
-            evidence='from ExCAPE-DB',
-            annotations={
-                'pXC50': self.pxc50,
-                'activity_flag': self.activity_flag,
-            }
-        )
+        if self.activity_flag == 'A':
+            return graph.add_increases(
+                self.chemical.as_pybel(),
+                self.target.as_pybel(),
+                citation='28316655',
+                evidence='from ExCAPE-DB',
+                annotations={
+                    'pXC50': self.pxc50,
+                    'activity_flag': self.activity_flag,
+                })
+        else:
+            return graph.add_inhibits(
+                self.chemical.as_pybel(),
+                self.target.as_pybel(),
+                citation='28316655',
+                evidence='from ExCAPE-DB',
+                annotations={
+                    'pXC50': self.pxc50,
+                    'activity_flag': self.activity_flag,
+                })
 
     @property
     def assay_url(self):
