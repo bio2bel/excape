@@ -63,7 +63,9 @@ class Manager(AbstractManager, FlaskMixin):
                     self.session.add(target)
 
                 interaction = seen_assays.get(row.Original_Assay_ID)
-                if interaction is None or interaction.target is not target or interaction.chemical is not chemical:
+                if interaction is not None and interaction.target and target and interaction.chemical is chemical:
+                    continue
+                else:
                     seen_assays[row.Original_Assay_ID] = interaction = Interaction(
                         activity_flag=row.Activity_Flag,
                         assay_id=row.Original_Assay_ID,

@@ -37,7 +37,7 @@ class Chemical(Base):
     smiles = Column(String(4098), nullable=False, doc="Canonical SMILES for the chemical (no stereochemistry)")
 
     __table_args__ = (
-        UniqueConstraint(db, entry_id),
+        UniqueConstraint(db, entry_id, inchi),
     )
 
     def as_pybel(self) -> pybel.dsl.Abundance:
@@ -84,9 +84,9 @@ class Interaction(Base):
     pxc50 = Column(Float, nullable=True, doc="pXC50/potency of the chemical")
     activity_flag = Column(String(255), nullable=False)
 
-    __table_args__ = (
+    '''__table_args__ = (
         UniqueConstraint(chemical_id, target_id, db, assay_id),
-    )
+    )'''
 
     def add_to_bel_graph(self, graph: BELGraph) -> str:
         """Add this interaction to a BEL graph."""
