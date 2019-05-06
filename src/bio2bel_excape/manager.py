@@ -2,24 +2,27 @@
 
 """Manager for Bio2BEL ExCAPE-DB."""
 
-from typing import Mapping, Optional, List
+from typing import List, Mapping, Optional, Tuple
 
-from bio2bel import AbstractManager
-from bio2bel.manager.flask_manager import FlaskMixin
-from pybel import BELGraph
-from pybel.dsl import Abundance, Protein
 from tqdm import tqdm
 
+from bio2bel import AbstractManager
+from bio2bel.manager.bel_manager import BELManagerMixin
+from bio2bel.manager.flask_manager import FlaskMixin
+from pybel import BELGraph
+from pybel.constants import CITATION_REFERENCE, CITATION_TYPE
+from pybel.dsl import Abundance, Protein
 from .constants import MODULE
 from .models import Base, Chemical, Interaction, Target
 from .parser import get_chunks
 
 
-class Manager(AbstractManager, FlaskMixin):
-    """Manager for Bio2BEL ExCAPE-DB."""
+class Manager(AbstractManager, BELManagerMixin, FlaskMixin):
+    """Chemical-target interactions."""
 
     module_name = MODULE
     _base = Base
+    edge_model = Interaction
     flask_admin_models = [Chemical, Target, Interaction]
 
     def count_chemicals(self) -> int:
@@ -30,9 +33,8 @@ class Manager(AbstractManager, FlaskMixin):
         """Check if the database is populated."""
         return 0 < self.count_chemicals()
 
-    def populate(self, url: Optional[str] = None, compression='xz') -> None:
+    def populate(self, url: Optional[str] = None, compression='xz', chunksize=100_000) -> None:
         """Populate the database."""
-        chunksize = 100_000
         chunks = get_chunks(url=url, compression=compression, chunksize=chunksize)
 
         inchi_to_chemical = {}
@@ -89,16 +91,13 @@ class Manager(AbstractManager, FlaskMixin):
             proteins=self.count_targets(),
         )
 
-    def get_chemical_by_inchi_key(self, inchi_key:
- str) -> Optional[Chemical]:
+    def get_chemical_by_inchi_key(self, inchi_key: str) -> Optional[Chemical]:
         """Get a chemical by its InChI key, if it exists."""
-        chemical: Chemical = self.session.query(Chemical).filter_by(inchikey=inchi_key).first()
-        return chemical
+        return self.session.query(Chemical).filter_by(inchikey=inchi_key).first()
 
     def get_target_by_entrez_id(self, entrez_id: str) -> Optional[Target]:
         """Get a protein by its Entrez identifier, if it exists."""
-        target: Target = self.session.query(Target).filter_by(entrez_id=entrez_id).first()
-        return target
+        return self.session.query(Target).filter_by(entrez_id=entrez_id).first()
 
     def count_interactions(self) -> int:
         """Count the interactions in the database."""
@@ -130,4 +129,30 @@ class Manager(AbstractManager, FlaskMixin):
                 print(f"Working on target {node.name} with {len(interactions)} interactions")
                 for inter in interactions:
                     inter.add_to_bel_graph(graph)
+        return graph
+
+    def list_interactions(self) -> List[Tuple[Chemical, Interaction, Target]]:
+        """List the interactions in the database."""
+        return self.session \
+            .query(Chemical, Interaction, Target) \
+            .join(Interaction) \
+            .join(Target)
+
+    def to_bel(self, *args, **kwargs) -> BELGraph:
+        """Export as a BEL graph."""
+        graph = BELGraph()
+        for chemical, interaction, target in tqdm(self.list_interactions()):
+            graph.add_inhibits(
+                chemical.as_pybel(),
+                target.as_pybel(),
+                citation={
+                    CITATION_TYPE: interaction.db,
+                    CITATION_REFERENCE: interaction.assay_id,
+                },
+                evidence='ExCAPE-DB',
+                annotations={
+                    'bio2bel': 'excape',
+                    'pxc50': interaction.pxc50,
+                }
+            )
         return graph
